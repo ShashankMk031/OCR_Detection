@@ -1,15 +1,16 @@
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 
 # All project paths are resolved relative to this file so the code can run
 # from the repository on different operating systems without hardcoded paths.
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-DATA_DIR = PROJECT_ROOT / "data"
+DATA_DIR = Path(os.getenv("SERIAL_OCR_DATA_DIR", str(PROJECT_ROOT / "data")))
 DETECTION_DATA_DIR = DATA_DIR / "detection"
 OCR_DATA_DIR = DATA_DIR / "ocr"
-MODELS_DIR = PROJECT_ROOT / "models"
+MODELS_DIR = Path(os.getenv("SERIAL_OCR_MODELS_DIR", str(PROJECT_ROOT / "models")))
 # Trained weights are expected to be copied here by the training scripts.
 DETECTION_MODEL_PATH = MODELS_DIR / "detection" / "best.pt"
 OCR_MODEL_PATH = MODELS_DIR / "ocr" / "best.pt"

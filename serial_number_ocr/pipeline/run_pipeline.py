@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import sys
 import time
 from pathlib import Path
@@ -57,10 +58,20 @@ def run_inference(image_path: str) -> dict:
     }
 
 
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Run serial number OCR inference on one image.")
+    parser.add_argument("image_path", nargs="?", help="Path to the input image.")
+    parser.add_argument("--image", dest="image_option", help="Path to the input image.")
+    args = parser.parse_args()
+    args.image_path = args.image_path or args.image_option
+    if not args.image_path:
+        parser.error("Provide an image path as a positional argument or with --image.")
+    return args
+
+
 def main() -> None:
-    if len(sys.argv) < 2:
-        raise SystemExit("Usage: python pipeline/run_pipeline.py <image_path>")
-    result = run_inference(sys.argv[1])
+    args = parse_args()
+    result = run_inference(args.image_path)
     print(result)
 
 
