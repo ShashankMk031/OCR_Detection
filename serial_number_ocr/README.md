@@ -45,17 +45,110 @@ Install dependencies from the project root:
 pip install -r requirements.txt
 ```
 
-## Training In Google Colab
+## Running In Google Colab
 
-Run the training workflow in this order from the `serial_number_ocr/` directory:
+### 1. Open Colab With GPU
+
+In Google Colab:
+
+- open a new notebook
+- go to `Runtime -> Change runtime type`
+- select `GPU`
+
+### 2. Clone The Repository
 
 ```bash
-python scripts/convert_dataset.py
-python scripts/train_detection.py
-python scripts/train_ocr.py
+!git clone <YOUR_GITHUB_REPO_LINK>
+%cd MiniProj06Sem/serial_number_ocr
 ```
 
-`convert_dataset.py` downloads and converts the configured datasets into YOLO training format. The detection and OCR training scripts then train YOLOv8 models and save the best weights under `models/`.
+### 3. Install Dependencies
+
+```bash
+!pip install -r requirements.txt
+!pip install ultralytics datasets opencv-python
+```
+
+### 4. Mount Google Drive
+
+This is recommended so converted datasets and trained weights are not lost when the Colab runtime resets.
+
+```python
+from google.colab import drive
+drive.mount("/content/drive")
+```
+
+### 5. Configure Data And Model Storage
+
+The project supports environment variables for portable storage locations. In Colab, set them before running conversion or training:
+
+```python
+import os
+
+os.environ["SERIAL_OCR_DATA_DIR"] = "/content/drive/MyDrive/serial_number_data"
+os.environ["SERIAL_OCR_MODELS_DIR"] = "/content/drive/MyDrive/serial_number_models"
+os.chdir("/content/MiniProj06Sem/serial_number_ocr")
+```
+
+### 6. Convert The Dataset
+
+```bash
+!python scripts/convert_dataset.py
+```
+
+This step:
+
+- downloads the configured datasets
+- converts them into YOLO detection and OCR datasets
+- stores output under the configured data directory
+
+### 7. Train The Detection Model
+
+```bash
+!python scripts/train_detection.py
+```
+
+This produces:
+
+- `models/detection/best.pt`
+
+If `SERIAL_OCR_MODELS_DIR` is set, the model will be saved under that external models directory instead.
+
+### 8. Train The OCR Model
+
+```bash
+!python scripts/train_ocr.py
+```
+
+This produces:
+
+- `models/ocr/best.pt`
+
+If `SERIAL_OCR_MODELS_DIR` is set, the model will be saved under that external models directory instead.
+
+### 9. Run Inference In Colab
+
+Upload a test image:
+
+```python
+from google.colab import files
+uploaded = files.upload()
+```
+
+Then run:
+
+```bash
+!python pipeline/run_pipeline.py --image test.jpg
+```
+
+Or use Python directly:
+
+```python
+from pipeline.run_pipeline import run_inference
+
+result = run_inference("test.jpg")
+print(result)
+```
 
 ## Usage
 
@@ -94,6 +187,57 @@ print(result["text"])
 ```
 
 The pipeline automatically loads the trained detection and OCR models from the `models/` directory.
+
+## Using The Trained Models In A Backend
+
+The backend team does not need to manually run the detector and OCR model separately unless they want low-level control. The intended integration point is:
+
+```python
+from pipeline.run_pipeline import run_inference
+
+result = run_inference("image.jpg")
+```
+
+This returns a backend-ready dictionary:
+
+```python
+{
+    "text": "...",
+    "confidence": 0.98,
+    "boxes": [...],
+    "processing_time": 0.1234,
+}
+```
+
+Recommended backend flow:
+
+1. save the uploaded image temporarily
+2. call `run_inference(image_path)`
+3. return the result as JSON from the API
+
+Minimal backend example:
+
+```python
+from pipeline.run_pipeline import run_inference
+
+def predict_serial_number(image_path: str) -> dict:
+    return run_inference(image_path)
+```
+
+If the backend stores trained weights outside the repository, set:
+
+```python
+import os
+
+os.environ["SERIAL_OCR_MODELS_DIR"] = "path/to/model/storage"
+```
+
+before importing or calling the pipeline. The expected files remain:
+
+- `detection/best.pt`
+- `ocr/best.pt`
+
+inside that configured models directory.
 
 ## Output Format
 
