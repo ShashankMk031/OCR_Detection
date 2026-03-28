@@ -1,0 +1,22 @@
+{
+    "include": [
+        "serial_number_ocr"
+    ],
+    "extraPaths": [
+        "./serial_number_ocr"
+    ],
+    "executionEnvironments": [
+        {
+            "root": "serial_number_ocr/scripts",
+            "extraPaths": [".."]
+        },
+        {
+            "root": "serial_number_ocr/pipeline",
+            "extraPaths": [".."]
+        },
+        {
+            "root": "serial_number_ocr",
+            "extraPaths": ["."]
+        }
+    ]
+}
