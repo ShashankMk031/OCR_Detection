@@ -24,6 +24,9 @@ from utils.io_utils import (
     yolo_line,
 )
 
+LIMIT = 2000
+MAX_IMAGE_DIMENSION = 2000
+
 
 @dataclass
 class WordAnnotation:
@@ -254,10 +257,16 @@ def convert_ocr_sample(image: np.ndarray, annotation: WordAnnotation, image_name
 
 
 def convert_split(dataset_name: str, split_name: str, dataset_split: Iterable[dict[str, Any]], counters: dict[str, int]) -> None:
+    count = 0
     for row_index, example in enumerate(dataset_split):
+        if count >= LIMIT:
+            break
         try:
             image = get_image(example)
             width, height = resolve_image_size(image)
+            if max(width, height) > MAX_IMAGE_DIMENSION:
+                counters["skipped"] += 1
+                continue
             words = build_word_annotations(example, width, height)
             if not words:
                 continue
@@ -270,16 +279,22 @@ def convert_split(dataset_name: str, split_name: str, dataset_split: Iterable[di
                 ocr_name = f"{dataset_name}_{split_name}_{row_index:07d}_{word_index:03d}"
                 if convert_ocr_sample(image, annotation, ocr_name):
                     counters["ocr"] += 1
+            count += 1
+            if count % 100 == 0:
+                print(f"Processed {count} samples from {dataset_name}/{split_name}")
         except Exception:
             counters["skipped"] += 1
+            continue
+
+    print(f"Processed {count} samples from {dataset_name}/{split_name}")
 
 
 def main() -> None:
     prepare_output_dirs()
-    synth, icdar = load_ocr_datasets()
+    synth = load_ocr_datasets()
     counters = {"detection": 0, "ocr": 0, "skipped": 0}
 
-    for dataset_name, dataset in (("synth", synth), ("icdar", icdar)):
+    for dataset_name, dataset in (("synth", synth),):
         for split_name, split_data in dataset.items():
             convert_split(dataset_name, split_name, split_data, counters)
 

@@ -150,6 +150,13 @@ result = run_inference("test.jpg")
 print(result)
 ```
 
+## Colab Execution Notes
+
+- Use a GPU runtime in Colab. Do not use TPU for this project.
+- Dataset conversion is intentionally limited to `2000` samples for better stability and lower memory usage.
+- The ICDAR dataset has been removed from the Colab workflow due to instability and dataset mismatch issues.
+- Very large images are skipped during conversion to reduce RAM crashes in notebook sessions.
+
 ## Usage
 
 Example:
