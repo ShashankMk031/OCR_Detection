@@ -48,7 +48,7 @@ def pil_to_bgr(image_obj: Any) -> np.ndarray:
 
 
 def get_image(example: dict[str, Any]) -> np.ndarray:
-    for key in ("image", "img", "pixel_values"):
+    for key in ("image", "img", "pixel_values", "jpg"):
         if key in example and example[key] is not None:
             return pil_to_bgr(example[key])
     raise KeyError(f"Unable to find image field in keys: {list(example.keys())}")
