@@ -7,10 +7,11 @@ from pathlib import Path
 from ultralytics import YOLO
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
-from utils.config import (
+from serial_number_ocr.utils.config import (
     DEFAULT_BATCH_SIZE,
     DEFAULT_EPOCHS,
     DEFAULT_IMAGE_SIZE,
@@ -18,7 +19,7 @@ from utils.config import (
     DETECTION_MODEL_PATH,
     TEXT_CLASS_NAME,
 )
-from utils.io_utils import build_yolo_data_config, ensure_dir
+from serial_number_ocr.utils.io_utils import build_yolo_data_config, ensure_dir
 
 
 def main() -> None:
@@ -30,7 +31,7 @@ def main() -> None:
     data_config = build_yolo_data_config(images_dir, [TEXT_CLASS_NAME], file_names)
     model = YOLO("yolo11n.pt")
     training_root = Path(tempfile.mkdtemp(prefix="detection_train_"))
-    train_results = model.train(
+    model.train(
         data=str(data_config),
         imgsz=DEFAULT_IMAGE_SIZE,
         epochs=DEFAULT_EPOCHS,
@@ -40,7 +41,11 @@ def main() -> None:
         exist_ok=True,
     )
 
-    best_source = Path(model.trainer.save_dir) / "weights" / "best.pt"
+    trainer = model.trainer
+    if trainer is None:
+        raise RuntimeError("YOLO trainer was not initialized after training.")
+
+    best_source = Path(trainer.save_dir) / "weights" / "best.pt"
     local_model_path = PROJECT_ROOT / "models" / "detection" / "best.pt"
     ensure_dir(DETECTION_MODEL_PATH.parent)
     DETECTION_MODEL_PATH.write_bytes(best_source.read_bytes())

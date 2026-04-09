@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import sys
+from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterable
@@ -9,12 +10,13 @@ import cv2
 import numpy as np
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
-from load_dataset import load_ocr_datasets
-from utils.config import DETECTION_DATA_DIR, IMAGE_SUFFIX, LABEL_SUFFIX, OCR_DATA_DIR
-from utils.io_utils import (
+from serial_number_ocr.load_dataset import load_ocr_datasets
+from serial_number_ocr.utils.config import DETECTION_DATA_DIR, IMAGE_SUFFIX, LABEL_SUFFIX, OCR_DATA_DIR
+from serial_number_ocr.utils.io_utils import (
     clip_box,
     ensure_dir,
     polygon_to_xyxy,
@@ -47,7 +49,7 @@ def pil_to_bgr(image_obj: Any) -> np.ndarray:
     return cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
 
 
-def get_image(example: dict[str, Any]) -> np.ndarray:
+def get_image(example: Mapping[str, Any]) -> np.ndarray:
     for key in ("image", "img", "pixel_values", "jpg"):
         if key in example and example[key] is not None:
             return pil_to_bgr(example[key])
@@ -103,7 +105,7 @@ def infer_char_boxes(word_box: list[float], text: str) -> list[list[float]]:
     return boxes
 
 
-def build_word_annotations(example: dict[str, Any], width: int, height: int) -> list[WordAnnotation]:
+def build_word_annotations(example: Mapping[str, Any], width: int, height: int) -> list[WordAnnotation]:
     words: list[WordAnnotation] = []
 
     json_blob = example.get("json")
@@ -256,7 +258,7 @@ def convert_ocr_sample(image: np.ndarray, annotation: WordAnnotation, image_name
     return True
 
 
-def convert_split(dataset_name: str, dataset_split: Iterable[dict[str, Any]], counters: dict[str, int]) -> None:
+def convert_split(dataset_name: str, dataset_split: Iterable[Any], counters: dict[str, int]) -> None:
     count = 0
     for row_index, example in enumerate(dataset_split):
         if LIMIT is not None and row_index >= LIMIT:

@@ -6,7 +6,7 @@ from pathlib import Path
 import numpy as np
 from ultralytics import YOLO
 
-from utils.config import DEFAULT_CONFIDENCE, DETECTION_MODEL_PATH
+from serial_number_ocr.utils.config import DEFAULT_CONFIDENCE, DETECTION_MODEL_PATH
 
 
 @lru_cache(maxsize=1)
@@ -20,6 +20,8 @@ def detect_text_regions(image: np.ndarray, model_path: str | Path = DETECTION_MO
     detections: list[dict] = []
 
     for result in results:
+        if result.boxes is None:
+            continue
         for box in result.boxes:
             xyxy = box.xyxy[0].tolist()
             detections.append(

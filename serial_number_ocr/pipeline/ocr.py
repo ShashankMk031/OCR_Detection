@@ -6,7 +6,7 @@ from pathlib import Path
 import numpy as np
 from ultralytics import YOLO
 
-from utils.config import DEFAULT_CONFIDENCE, OCR_MODEL_PATH
+from serial_number_ocr.utils.config import DEFAULT_CONFIDENCE, OCR_MODEL_PATH
 
 
 @lru_cache(maxsize=1)
@@ -20,6 +20,8 @@ def detect_digits(image: np.ndarray, model_path: str | Path = OCR_MODEL_PATH, co
     detections: list[dict] = []
 
     for result in results:
+        if result.boxes is None:
+            continue
         for box in result.boxes:
             x1, y1, x2, y2 = box.xyxy[0].tolist()
             detections.append(

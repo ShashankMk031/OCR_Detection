@@ -5,7 +5,7 @@ from typing import Iterable
 import cv2
 import numpy as np
 
-from pipeline.ocr import detect_digits
+from serial_number_ocr.pipeline.ocr import detect_digits
 
 
 def compute_iou(box_a: list[float], box_b: list[float]) -> float:

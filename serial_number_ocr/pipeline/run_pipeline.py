@@ -6,13 +6,14 @@ import time
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
-from pipeline.crop_rotate import crop_rotate_pad
-from pipeline.detect import detect_text_regions
-from pipeline.postprocess import select_best_orientation
-from utils.io_utils import load_image
+from serial_number_ocr.pipeline.crop_rotate import crop_rotate_pad
+from serial_number_ocr.pipeline.detect import detect_text_regions
+from serial_number_ocr.pipeline.postprocess import select_best_orientation
+from serial_number_ocr.utils.io_utils import load_image
 
 
 def remap_boxes_to_image(detections: list[dict], crop_metadata: dict) -> list[dict]:
