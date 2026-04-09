@@ -41,9 +41,14 @@ def main() -> None:
     )
 
     best_source = Path(model.trainer.save_dir) / "weights" / "best.pt"
+    local_model_path = PROJECT_ROOT / "models" / "detection" / "best.pt"
     ensure_dir(DETECTION_MODEL_PATH.parent)
     DETECTION_MODEL_PATH.write_bytes(best_source.read_bytes())
+    ensure_dir(local_model_path.parent)
+    local_model_path.write_bytes(best_source.read_bytes())
     print(f"Saved detection model to {DETECTION_MODEL_PATH}")
+    if DETECTION_MODEL_PATH != local_model_path:
+        print(f"Mirrored detection model to {local_model_path}")
 
 
 if __name__ == "__main__":

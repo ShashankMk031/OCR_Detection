@@ -34,9 +34,14 @@ def main() -> None:
     )
 
     best_source = Path(model.trainer.save_dir) / "weights" / "best.pt"
+    local_model_path = PROJECT_ROOT / "models" / "ocr" / "best.pt"
     ensure_dir(OCR_MODEL_PATH.parent)
     OCR_MODEL_PATH.write_bytes(best_source.read_bytes())
+    ensure_dir(local_model_path.parent)
+    local_model_path.write_bytes(best_source.read_bytes())
     print(f"Saved OCR model to {OCR_MODEL_PATH}")
+    if OCR_MODEL_PATH != local_model_path:
+        print(f"Mirrored OCR model to {local_model_path}")
 
 
 if __name__ == "__main__":

@@ -261,6 +261,7 @@ def convert_split(dataset_name: str, split_name: str, dataset_split: Iterable[di
     for row_index, example in enumerate(dataset_split):
         if count >= LIMIT:
             break
+        count += 1
         try:
             image = get_image(example)
             width, height = resolve_image_size(image)
@@ -279,7 +280,6 @@ def convert_split(dataset_name: str, split_name: str, dataset_split: Iterable[di
                 ocr_name = f"{dataset_name}_{split_name}_{row_index:07d}_{word_index:03d}"
                 if convert_ocr_sample(image, annotation, ocr_name):
                     counters["ocr"] += 1
-            count += 1
             if count % 100 == 0:
                 print(f"Processed {count} samples from {dataset_name}/{split_name}")
         except Exception:
