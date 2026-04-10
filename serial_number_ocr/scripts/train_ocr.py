@@ -7,13 +7,13 @@ from pathlib import Path
 import torch
 from ultralytics import YOLO
 
-from serial_number_ocr.utils.config import DEFAULT_EPOCHS, DIGIT_CLASS_NAMES, OCR_DATA_DIR, OCR_MODEL_PATH
-from serial_number_ocr.utils.io_utils import build_yolo_data_config, ensure_dir
-
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
+
+from serial_number_ocr.utils.config import DEFAULT_EPOCHS, DIGIT_CLASS_NAMES, OCR_DATA_DIR, OCR_MODEL_PATH
+from serial_number_ocr.utils.io_utils import build_yolo_data_config, ensure_dir
 
 TRAIN_IMAGE_SIZE = 512
 TRAIN_BATCH_SIZE = 8
